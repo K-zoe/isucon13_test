@@ -176,6 +176,7 @@ def reserve_livestream_handler() -> tuple[dict[str, Any], int]:
         slots = [models.ReservationSlotModel(**row) for row in rows]
 
         for slot in slots:
+            #スロークエリ
             sql = (
                 "SELECT slot FROM reservation_slots WHERE start_at = %s AND end_at = %s"
             )
@@ -1286,7 +1287,7 @@ def get_icon_handler(username: str) -> Response:
         if row is None:
             raise HttpException("user not found", INTERNAL_SERVER_ERROR)
         user = models.UserModel(**row)
-
+        #スロークエリ
         sql = "SELECT image FROM icons WHERE user_id = %s"
         c.execute(sql, [user.id])
 
@@ -1622,7 +1623,7 @@ def fill_livestream_response(
     owner_model = models.UserModel(**row)
 
     owner = fill_user_response(c, owner_model)
-
+    #スロークエリ
     sql = "SELECT * FROM livestream_tags WHERE livestream_id = %s"
     c.execute(sql, [livestream_model.id])
     rows = c.fetchall()
@@ -1661,7 +1662,7 @@ def fill_user_response(
     if row is None:
         raise HttpException("not found", NOT_FOUND)
     theme_model = models.ThemeModel(**row)
-
+    #スロークエリ
     sql = "SELECT image FROM icons WHERE user_id = %s"
     c.execute(sql, [user_model.id])
     image_row = c.fetchone()
