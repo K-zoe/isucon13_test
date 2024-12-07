@@ -136,8 +136,8 @@ def get_streamer_theme_handler(username: str) -> tuple[dict[str, Any], int]:
 
 # livestream
 # reserve livestream
+@lru_cache(maxsize = 100)
 @app.route("/api/livestream/reservation", methods=["POST"])
-@lru_cache(maxsize = 1000)
 def reserve_livestream_handler() -> tuple[dict[str, Any], int]:
     verify_user_session()
 
