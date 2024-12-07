@@ -27,7 +27,7 @@ import mysql.connector
 from flask import Flask, Response, request, send_file, session
 from mysql.connector.errors import DatabaseError
 from sqlalchemy import create_engine
-from functools import lru_cache
+from flask_caching import Cache
 
 
 class Settings(object):
@@ -59,6 +59,7 @@ class Settings(object):
 
 
 app = Flask(__name__)
+cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 
 # 初期化
@@ -136,8 +137,8 @@ def get_streamer_theme_handler(username: str) -> tuple[dict[str, Any], int]:
 
 # livestream
 # reserve livestream
-@lru_cache(maxsize = 100)
 @app.route("/api/livestream/reservation", methods=["POST"])
+@cache.cached(timeout=60) 
 def reserve_livestream_handler() -> tuple[dict[str, Any], int]:
     verify_user_session()
 
@@ -1275,7 +1276,7 @@ def get_user_statistics_handler(username: str) -> tuple[dict[str, Any], int]:
 
 
 @app.route("/api/user/<string:username>/icon", methods=["GET"])
-@lru_cache(maxsize = 1000)
+@cache.cached(timeout=60) 
 def get_icon_handler(username: str) -> Response:
     conn = engine.raw_connection()
 
@@ -1613,7 +1614,7 @@ def fill_livecomment_report_response(
         created_at=report_model.created_at,
     )
 
-@lru_cache(maxsize = 1000)
+@cache.cached(timeout=60) 
 def fill_livestream_response(
     c: mysql.connector.cursor.MySQLCursorDict,
     livestream_model: models.LiveStreamModel,
@@ -1655,8 +1656,7 @@ def fill_livestream_response(
     )
     return livestream
 
-
-@lru_cache(maxsize = 1000)
+@cache.cached(timeout=60) 
 def fill_user_response(
     c: mysql.connector.cursor.MySQLCursorDict, user_model: models.UserModel
 ) -> models.User:
